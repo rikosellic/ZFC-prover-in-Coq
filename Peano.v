@@ -1,35 +1,19 @@
 Require Import FV.ZFLib.
-Require Import FV.MathmeticalInduction.
+Require Import FV.MathematicalInduction.
 
 Lemma equal_rev:
   [[ZF|--∀ x, ∀ y , x = y -> y = x]].
 Proof.
 pose proof Extensionality.
 universal instantiation H x y.
-assert [[ZF;;x=y|--∀ z, z ∈ x <-> z ∈ y]] by FOL_tauto.
-universal instantiation H1 z.
-assert [[ZF;;x=y|--z ∈ y <-> z ∈ x]] by FOL_tauto.
-universal generalization H3 z.
 universal instantiation H y x.
-assert [[ZF|--x=y->y=x]] by FOL_tauto.
+assert [[ZF;;x=y|--∀ z, z ∈ x <-> z ∈ y]] by Tauto.
+universal instantiation H2 z.
+assert [[ZF;;x=y|--z ∈ y <-> z ∈ x]] by Tauto.
+universal generalization H4 z.
+assert [[ZF|--x=y->y=x]] by Tauto.
 universal generalization H6 x y.
 The conclusion is already proved.
-Qed.
-
-Lemma subset_subset_equal:
-  [[ ZF |-- ∀ x, ∀ y, x ⊆ y -> y ⊆ x -> x = y ]].
-Proof.
-  pose proof Extensionality.
-  universal instantiation H x y.
-  assert [[ ZF;; x ⊆ y ;; y ⊆ x |-- ∀ z, z ∈ x -> z ∈ y ]] by FOL_tauto.
-  assert [[ ZF;; x ⊆ y ;; y ⊆ x |-- ∀ z, z ∈ y -> z ∈ x ]] by FOL_tauto.
-  universal instantiation H1 z.
-  universal instantiation H2 z.
-  assert [[ ZF;; x ⊆ y ;; y ⊆ x |-- z ∈ x <-> z ∈ y ]] by FOL_tauto.
-  universal generalization H5 z.
-  assert [[ ZF |-- x ⊆ y -> y ⊆ x -> x = y ]] by FOL_tauto.
-  universal generalization H7 x y.
-  The conclusion is already proved.
 Qed.
 
 Lemma is_singleton_exists: 
@@ -39,39 +23,38 @@ Proof.
   universal instantiation H x x. clear H.
   assert [[ZF;; ∀ u, u ∈ z <-> u = x \/ u = x |-- ∀ u, u ∈ z <-> u = x \/ u = x]] by Tauto.
   universal instantiation H u. clear H.
-  assert [[ZF |-- u∈x \/ u ∈x<-> u∈x]] by Tauto.
-  assert [[ZF;; ∀ u, u ∈ z <-> u = x \/ u = x |-- u ∈ z <-> u = x ]] by Tauto. clear H H1.
-  universal generalization H2 u. clear H2.
-  existential generalization H [[∃z, ∀u, u∈ z <-> u = x]]. clear H.
-  existential instantiation H1 [[∃ z, ∀ u, u ∈ z <-> u = x \/ u = x]]. clear H1.
-  assert [[ZF|-- ∃z, is_singleton z x]] by Tauto. clear H H0.
-  universal generalization H1 x. clear H1.
+  assert [[ZF;; ∀ u, u ∈ z <-> u = x \/ u = x |-- u ∈ z <-> u = x ]] by Tauto.
+  universal generalization H u. 
+  existential generalization H2 [[∃z, ∀u, u∈ z <-> u = x]].
+  existential instantiation H3 [[∃ z, ∀ u, u ∈ z <-> u = x \/ u = x]].
+  assert [[ZF|-- ∃z, is_singleton z x]] by Tauto. 
+  universal generalization H5 x. 
   The conclusion is already proved.
 Qed.
 
 Lemma singleton_equivalent:
   [[ZF|--∀ x, ∀ y, is_singleton y x <-> y = {x} ]].
 Proof.
-assert [[ZF|--is_singleton y x <-> (∀ z, z∈y <-> z = x)]] by FOL_tauto.
+assert [[ZF|--is_singleton y x <-> (∀ z, z∈y <-> z = x)]] by Tauto.
 pose proof Singleton.
 pose proof Extensionality.
 universal instantiation H0 x.
 universal instantiation H1 [[{x}]] y.
-assert [[ZF;;z ∈ y<->z = x;;z ∈ {x}<->z = x|--z∈y<->z∈{x}]] by FOL_tauto.
-assert [[ZF;;is_singleton y x |-- ∀ z, z ∈ y <-> z = x]] by FOL_tauto.
+assert [[ZF;;z ∈ y<->z = x;;z ∈ {x}<->z = x|--z∈y<->z∈{x}]] by Tauto.
+assert [[ZF;;is_singleton y x |-- ∀ z, z ∈ y <-> z = x]] by Tauto.
 universal instantiation H5 z.
 universal instantiation H2 z.
-assert [[ZF;;is_singleton y x |--z∈y <-> z∈{x} ]] by FOL_tauto.
+assert [[ZF;;is_singleton y x |--z∈y <-> z∈{x} ]] by Tauto.
 universal generalization H8 z.
 universal instantiation H1 y [[{x}]].
-assert [[ZF;;is_singleton y x|--y={x}]] by FOL_tauto.
+assert [[ZF;;is_singleton y x|--y={x}]] by Tauto.
 clear H5 H6 H8 H9.
-assert [[ZF;;y={x}|--∀ z, z ∈ y <-> z ∈ {x}]]by FOL_tauto.
+assert [[ZF;;y={x}|--∀ z, z ∈ y <-> z ∈ {x}]]by Tauto.
 universal instantiation H5 z.
-assert [[ZF;;y={x}|--z∈y<->z=x]]by FOL_tauto.
+assert [[ZF;;y={x}|--z∈y<->z=x]]by Tauto.
 universal generalization H8 z.
-assert [[ZF;;y={x}|--is_singleton y x]] by FOL_tauto.
-assert [[ZF|--is_singleton y x <-> y={x}]] by FOL_tauto.
+assert [[ZF;;y={x}|--is_singleton y x]] by Tauto.
+assert [[ZF|--is_singleton y x <-> y={x}]] by Tauto.
 universal generalization H13 x y.
 The conclusion is already proved.
 Qed.
@@ -189,7 +172,6 @@ Qed.
 Lemma is_pair_injection: 
 [[ZF |-- ∀x, ∀ y, ∀ u, ∀ v, is_pair x u v -> is_pair y u v -> x = y]].
 Proof.
-  Print is_pair_def.
   assert [[ZF;; is_pair x u v |-- ∃ a, ∃ b, is_singleton a u /\ has_two_ele b u v /\ has_two_ele x a b]] by Tauto.
   assert [[ZF;; is_pair y u v |-- ∃ c, ∃ d, is_singleton c u /\ has_two_ele d u v /\ has_two_ele y c d]] by Tauto.
   pose proof is_singleton_injection.
@@ -307,17 +289,17 @@ Qed.
 Lemma triple_injection:
   [[ZF|--∀ x, ∀ y, ∀ z, ∀ a, ∀ b, is_triple a x y z /\ is_triple b x y z -> a = b ]].
 Proof.
-assert [[ZF;;is_triple a x y z |-- ∃ u , is_pair u x y /\ is_pair a u z]] by FOL_tauto.
-assert [[ZF;;is_triple b x y z |-- ∃ v , is_pair v x y /\ is_pair b v z]] by FOL_tauto.
+assert [[ZF;;is_triple a x y z |-- ∃ u , is_pair u x y /\ is_pair a u z]] by Tauto.
+assert [[ZF;;is_triple b x y z |-- ∃ v , is_pair v x y /\ is_pair b v z]] by Tauto.
 pose proof is_pair_injection.
 universal instantiation H1 u v x y.
 apply PEq_sub u v [[is_pair a v z]].
 universal instantiation H1 a b v z.
-assert [[ZF;;is_pair u x y /\ is_pair a u z;;is_pair v x y /\ is_pair b v z|--a=b]]by FOL_tauto.
+assert [[ZF;;is_pair u x y /\ is_pair a u z;;is_pair v x y /\ is_pair b v z|--a=b]]by Tauto.
 existential instantiation H5 [[∃ v, is_pair v x y /\ is_pair b v z]].
-assert [[ZF;;∃ v,is_pair v x y /\ is_pair b v z;;is_pair u x y /\ is_pair a u z|--a=b]]by FOL_tauto.
+assert [[ZF;;∃ v,is_pair v x y /\ is_pair b v z;;is_pair u x y /\ is_pair a u z|--a=b]]by Tauto.
 existential instantiation H7 [[∃ u, is_pair u x y /\ is_pair a u z]].
-assert [[ZF|--is_triple a x y z /\ is_triple b x y z -> a = b]]by FOL_tauto.
+assert [[ZF|--is_triple a x y z /\ is_triple b x y z -> a = b]]by Tauto.
 universal generalization H9 x y z a b.
 The conclusion is already proved.
 Qed.
@@ -326,18 +308,18 @@ Lemma triple_inversion:
   [[ZF|--∀ x, ∀ y, ∀ z, ∀ a, ∀ b, ∀ c, ∀ u, is_triple u x y z /\ is_triple u a b c -> x = a /\ y = b /\ z = c ]].
 Proof.
 pose proof is_pair_inversion.
-assert [[ZF;;is_triple u x y z|--∃ X, is_pair X x y /\ is_pair u X z]] by FOL_tauto.
-assert [[ZF;;is_triple u a b c|--∃ Y, is_pair Y a b /\ is_pair u Y c]] by FOL_tauto.
+assert [[ZF;;is_triple u x y z|--∃ X, is_pair X x y /\ is_pair u X z]] by Tauto.
+assert [[ZF;;is_triple u a b c|--∃ Y, is_pair Y a b /\ is_pair u Y c]] by Tauto.
 universal instantiation H u X z Y c.
 apply PEq_sub Y X [[is_pair X a b]].
 pose proof equal_rev.
 universal instantiation H4 X Y.
 universal instantiation H X x y a b.
-assert [[ZF;;is_pair X x y /\ is_pair u X z;;is_pair Y a b /\ is_pair u Y c|--x = a /\ y = b /\ z = c]] by FOL_tauto.
+assert [[ZF;;is_pair X x y /\ is_pair u X z;;is_pair Y a b /\ is_pair u Y c|--x = a /\ y = b /\ z = c]] by Tauto.
 existential instantiation H7 [[∃ Y, is_pair Y a b /\ is_pair u Y c]].
-assert [[ZF;;is_pair X x y /\ is_pair u X z|--(∃ Y, is_pair Y a b /\ is_pair u Y c) -> x = a /\ y = b /\ z = c]] by FOL_tauto.
+assert [[ZF;;is_pair X x y /\ is_pair u X z|--(∃ Y, is_pair Y a b /\ is_pair u Y c) -> x = a /\ y = b /\ z = c]] by Tauto.
 existential instantiation H9 [[∃ X, is_pair X x y /\ is_pair u X z]].
-assert [[ZF|--is_triple u x y z /\ is_triple u a b c -> x = a /\ y = b /\ z = c]] by FOL_tauto.
+assert [[ZF|--is_triple u x y z /\ is_triple u a b c -> x = a /\ y = b /\ z = c]] by Tauto.
 universal generalization H11 a b c u.
 universal generalization H12 x y z.
 The conclusion is already proved.
@@ -395,25 +377,25 @@ Proof.
 pose proof Singleton.
 universal instantiation H n n.
 apply PEq_refl n.
-assert [[ZF|--n ∈ {n} ]] by FOL_tauto.
+assert [[ZF|--n ∈ {n} ]] by Tauto.
 pose proof Empty.
-assert [[ZF|--∀ x, ¬ x ∈ ∅ ]] by FOL_tauto.
+assert [[ZF|--∀ x, ¬ x ∈ ∅ ]] by Tauto.
 universal instantiation H4 n.
 
 pose proof Extensionality.
 universal instantiation H6 [[n∪{n}]] [[∅]].
-assert [[ZF;;n ∪ {n} = ∅|--∀z, z∈n∪{n} <-> z∈∅]]by FOL_tauto.
+assert [[ZF;;n ∪ {n} = ∅|--∀z, z∈n∪{n} <-> z∈∅]]by Tauto.
 universal instantiation H8 n.
-assert [[ZF|--n∪{n}=∅->n∈n∪{n}-> n∈∅]]by FOL_tauto.
-assert [[ZF|--¬ n∪{n}=∅ \/ ¬n∈n∪{n} \/ n∈∅]]by FOL_tauto.
-assert [[ZF|--¬ n∪{n}=∅ \/ ¬n∈n∪{n}]]by FOL_tauto.
+assert [[ZF|--n∪{n}=∅->n∈n∪{n}-> n∈∅]]by Tauto.
+assert [[ZF|--¬ n∪{n}=∅ \/ ¬n∈n∪{n} \/ n∈∅]]by Tauto.
+assert [[ZF|--¬ n∪{n}=∅ \/ ¬n∈n∪{n}]]by Tauto.
 
 pose proof Union.
 universal instantiation H13 n [[{n}]] n.
 clear H H0 H1 H3 H4 H6 H7 H8.
-assert [[ZF|-- n∈n∪{n} ]]by FOL_tauto.
+assert [[ZF|-- n∈n∪{n} ]]by Tauto.
 
-assert [[ZF|--¬ n∪{n}=∅]]by FOL_tauto.
+assert [[ZF|--¬ n∪{n}=∅]]by Tauto.
 universal generalization H0 n.
 The conclusion is already proved.
 Qed.
@@ -421,16 +403,16 @@ Qed.
 Lemma one_in_nat:
   [[ZF;;is_natural_number N|--∅∪{∅}∈N]].
 Proof.
-assert [[ZF;;is_natural_number N|--∀ x, x ∈ N -> x∪{x} ∈ N]] by FOL_tauto.
+assert [[ZF;;is_natural_number N|--∀ x, x ∈ N -> x∪{x} ∈ N]] by Tauto.
 universal instantiation H [[∅]].
-assert [[ZF;;is_natural_number N|--∅∈N]] by FOL_tauto.
+assert [[ZF;;is_natural_number N|--∅∈N]] by Tauto.
 The conclusion is already proved.
 Qed.
 
 Lemma two_in_nat:
   [[ZF;;is_natural_number N|--∅∪{∅}∪{∅∪{∅}}∈N]].
 Proof.
-assert [[ZF;;is_natural_number N|--∀ x, x ∈ N -> x∪{x} ∈ N]] by FOL_tauto.
+assert [[ZF;;is_natural_number N|--∀ x, x ∈ N -> x∪{x} ∈ N]] by Tauto.
 universal instantiation H [[∅∪{∅}]].
 pose proof one_in_nat.
 The conclusion is already proved.
@@ -450,10 +432,10 @@ Proof.
 pose proof Singleton.
 universal instantiation H x x.
 apply PEq_refl x.
-assert [[ZF|--x∈{x}]]by FOL_tauto.
-assert [[ZF;;is_empty {x}|--∀z,¬z∈{x}]]by FOL_tauto.
+assert [[ZF|--x∈{x}]]by Tauto.
+assert [[ZF;;is_empty {x}|--∀z,¬z∈{x}]]by Tauto.
 universal instantiation H3 x.
-assert [[ZF|--¬is_empty {x}]]by FOL_tauto.
+assert [[ZF|--¬is_empty {x}]]by Tauto.
 universal generalization H5 x.
 The conclusion is already proved.
 Qed.
@@ -468,13 +450,13 @@ universal instantiation H [[{x}]]. clear H.
 pose proof Singleton.
 universal instantiation H x y.
 universal instantiation H x x. clear H.
-assert [[ZF;;y∈{x};;∀z,z∈{x}->¬z∈y|--∀z,z∈{x}->¬z∈y]]by FOL_tauto.
+assert [[ZF;;y∈{x};;∀z,z∈{x}->¬z∈y|--∀z,z∈{x}->¬z∈y]]by Tauto.
 universal instantiation H x. clear H.
 apply PEq_refl x.
 apply PEq_sub using condition y x [[¬x∈y]].
-assert [[ZF;;y∈{x}/\(∀z,z∈{x}->¬z∈y)|--¬x∈x]]by FOL_tauto.
+assert [[ZF;;y∈{x}/\(∀z,z∈{x}->¬z∈y)|--¬x∈x]]by Tauto.
 existential instantiation H6 [[∃y,y∈{x}/\(∀z,z∈{x}->¬z∈y)]].
-assert [[ZF|--¬x∈x]]by FOL_tauto.
+assert [[ZF|--¬x∈x]]by Tauto.
 universal generalization H8 x.
 The conclusion is already proved.
 Qed.
@@ -484,33 +466,33 @@ Lemma no_mutual_belong:
 Proof.
 pose proof Pairing.
 universal instantiation H x y. clear H.
-assert [[ZF;;∀u,u∈a<->u=x\/u=y|--∀u,u∈a<->u=x\/u=y]]by FOL_tauto.
+assert [[ZF;;∀u,u∈a<->u=x\/u=y|--∀u,u∈a<->u=x\/u=y]]by Tauto.
 universal instantiation H x.
 universal instantiation H y.
 apply PEq_refl x.
 apply PEq_refl y.
-assert [[ZF;;∀u,u∈a<->u=x\/u=y|--x∈a/\y∈a]]by FOL_tauto. clear H1 H2 H3 H4.
-assert [[ZF;;is_empty a|--∀x,¬x∈a]]by FOL_tauto.
+assert [[ZF;;∀u,u∈a<->u=x\/u=y|--x∈a/\y∈a]]by Tauto. clear H1 H2 H3 H4.
+assert [[ZF;;is_empty a|--∀x,¬x∈a]]by Tauto.
 universal instantiation H1 x. clear H1.
-assert [[ZF;;∀u,u∈a<->u=x\/u=y|--¬is_empty a /\ x∈a /\ y∈a]]by FOL_tauto. clear H5 H2.
+assert [[ZF;;∀u,u∈a<->u=x\/u=y|--¬is_empty a /\ x∈a /\ y∈a]]by Tauto. clear H5 H2.
 
 pose proof Regularity.
 universal instantiation H2 a. clear H2.
 universal instantiation H c. clear H.
-assert [[ZF;;∀u,u∈a<->u=x\/u=y;;c∈a/\(∀z,z∈a->¬z∈c)|--c=x\/c=y]]by FOL_tauto. clear H2.
-assert [[ZF;;∀u,u∈a<->u=x\/u=y;;c∈a/\(∀z,z∈a->¬z∈c);;c=x|--∀z,z∈a->¬z∈c]]by FOL_tauto.
+assert [[ZF;;∀u,u∈a<->u=x\/u=y;;c∈a/\(∀z,z∈a->¬z∈c)|--c=x\/c=y]]by Tauto. clear H2.
+assert [[ZF;;∀u,u∈a<->u=x\/u=y;;c∈a/\(∀z,z∈a->¬z∈c);;c=x|--∀z,z∈a->¬z∈c]]by Tauto.
 universal instantiation H2 y.
 apply PEq_sub c x [[¬y∈x]].
-assert [[ZF;;∀u,u∈a<->u=x\/u=y;;c∈a/\(∀z,z∈a->¬z∈c);;c=x|--¬y∈x]]by FOL_tauto. clear H2 H4 H5.
-assert [[ZF;;∀u,u∈a<->u=x\/u=y;;c∈a/\(∀z,z∈a->¬z∈c);;c=y|--∀z,z∈a->¬z∈c]]by FOL_tauto.
+assert [[ZF;;∀u,u∈a<->u=x\/u=y;;c∈a/\(∀z,z∈a->¬z∈c);;c=x|--¬y∈x]]by Tauto. clear H2 H4 H5.
+assert [[ZF;;∀u,u∈a<->u=x\/u=y;;c∈a/\(∀z,z∈a->¬z∈c);;c=y|--∀z,z∈a->¬z∈c]]by Tauto.
 universal instantiation H2 x.
 apply PEq_sub c y [[¬x∈y]].
-assert [[ZF;;∀u,u∈a<->u=x\/u=y;;c∈a/\(∀z,z∈a->¬z∈c);;c=y|--¬x∈y]]by FOL_tauto. clear H2 H4 H5.
-assert [[ZF;;∀u,u∈a<->u=x\/u=y;;c∈a/\(∀z,z∈a->¬z∈c)|--¬x∈y\/¬y∈x]]by FOL_tauto. clear H H6 H7.
+assert [[ZF;;∀u,u∈a<->u=x\/u=y;;c∈a/\(∀z,z∈a->¬z∈c);;c=y|--¬x∈y]]by Tauto. clear H2 H4 H5.
+assert [[ZF;;∀u,u∈a<->u=x\/u=y;;c∈a/\(∀z,z∈a->¬z∈c)|--¬x∈y\/¬y∈x]]by Tauto. clear H H6 H7.
 existential instantiation H2 [[∃y,y∈a/\(∀z,z∈a->¬z∈y)]].
-assert [[ZF;;∀u,u∈a<->u=x\/u=y|--¬x∈y\/¬y∈x]]by FOL_tauto.
+assert [[ZF;;∀u,u∈a<->u=x\/u=y|--¬x∈y\/¬y∈x]]by Tauto.
 existential instantiation H4 [[∃z,∀u,u∈z<->u=x\/u=y]].
-assert [[ZF|--¬(x∈y/\y∈x)]]by FOL_tauto.
+assert [[ZF|--¬(x∈y/\y∈x)]]by Tauto.
 universal generalization H6 x y.
 The conclusion is already proved.
 Qed.
@@ -526,17 +508,17 @@ universal instantiation H x x.
 universal instantiation H y y. clear H.
 apply PEq_refl x.
 apply PEq_refl y.
-assert [[ZF|--x∈x∪{x}/\y∈y∪{y}]]by FOL_tauto. clear H0 H1 H2 H3 H H4.
+assert [[ZF|--x∈x∪{x}/\y∈y∪{y}]]by Tauto. clear H0 H1 H2 H3 H H4.
 apply PEq_sub [[x∪{x}]] [[y∪{y}]] [[x∈y∪{y}]].
 pose proof equal_rev.
 universal instantiation H0 [[x∪{x}]] [[y∪{y}]]. clear H0.
 apply PEq_sub [[y∪{y}]] [[x∪{x}]] [[y∈x∪{x}]].
-assert [[ZF;;x∪{x}=y∪{y}|--y∈x∪{x}/\x∈y∪{y}]]by FOL_tauto. clear H5 H H1 H0.
+assert [[ZF;;x∪{x}=y∪{y}|--y∈x∪{x}/\x∈y∪{y}]]by Tauto. clear H5 H H1 H0.
 pose proof Union.
 universal instantiation H x [[{x}]] y.
 universal instantiation H y [[{y}]] x. clear H.
-assert [[ZF;;x∪{x}=y∪{y}|--(y∈x\/y∈{x})/\(x∈y\/x∈{y})]]by FOL_tauto. clear H2 H0 H1.
-assert [[ZF;;x∪{x}=y∪{y}|--(y∈x/\x∈y)\/(y∈x/\x∈{y})\/(y∈{x}/\x∈y)\/(y∈{x}/\x∈{y})]]by FOL_tauto. clear H.
+assert [[ZF;;x∪{x}=y∪{y}|--(y∈x\/y∈{x})/\(x∈y\/x∈{y})]]by Tauto. clear H2 H0 H1.
+assert [[ZF;;x∪{x}=y∪{y}|--(y∈x/\x∈y)\/(y∈x/\x∈{y})\/(y∈{x}/\x∈y)\/(y∈{x}/\x∈{y})]]by Tauto. clear H.
 
 pose proof no_mutual_belong.
 universal instantiation H y x. clear H.
@@ -549,7 +531,7 @@ pose proof equal_rev.
 universal instantiation H3 x y. clear H3.
 pose proof x_not_in_x.
 universal instantiation H3 x. clear H3.
-assert [[ZF|--¬(y∈x/\x∈{y})]]by FOL_tauto. clear H2 H H4 H5.
+assert [[ZF|--¬(y∈x/\x∈{y})]]by Tauto. clear H2 H H4 H5.
 
 pose proof Singleton.
 universal instantiation H x y. clear H.
@@ -558,12 +540,12 @@ pose proof equal_rev.
 universal instantiation H4 y x. clear H4.
 pose proof x_not_in_x.
 universal instantiation H4 y. clear H4.
-assert [[ZF|--¬(x∈y/\y∈{x})]]by FOL_tauto. clear H2 H H5 H6.
+assert [[ZF|--¬(x∈y/\y∈{x})]]by Tauto. clear H2 H H5 H6.
 
 pose proof Singleton.
 universal instantiation H y x. clear H.
 
-assert [[ZF|--x∪{x}=y∪{y}->x=y]]by FOL_tauto.
+assert [[ZF|--x∪{x}=y∪{y}->x=y]]by Tauto.
 universal generalization H x y.
 The conclusion is already proved.
 Qed.
@@ -575,15 +557,15 @@ pose proof natural_number_inversion.
 universal instantiation H [[x∪{x}]]. clear H.
 pose proof not_empty.
 universal instantiation H x. clear H.
-assert [[ZF;;is_natural_number N;;x∪{x}∈N|--(∃y,y∈N/\x∪{x}=y∪{y})]]by FOL_tauto. clear H0 H1.
+assert [[ZF;;is_natural_number N;;x∪{x}∈N|--(∃y,y∈N/\x∪{x}=y∪{y})]]by Tauto. clear H0 H1.
 pose proof Sn_inversion.
 universal instantiation H0 x y. clear H0.
 pose proof equal_rev.
 universal instantiation H0 x y. clear H0.
 apply PEq_sub y x [[x∈N]].
-assert [[ZF;;y∈N/\x∪{x}=y∪{y}|--x∈N]]by FOL_tauto. clear H1 H2 H0.
+assert [[ZF;;y∈N/\x∪{x}=y∪{y}|--x∈N]]by Tauto. clear H1 H2 H0.
 existential instantiation H3 [[∃y,y∈N/\x∪{x}=y∪{y}]].
-assert [[ZF;;is_natural_number N|--x ∪ {x} ∈ N->x∈N]]by FOL_tauto.
+assert [[ZF;;is_natural_number N|--x ∪ {x} ∈ N->x∈N]]by Tauto.
 universal generalization H1 x.
 The conclusion is already proved.
 Qed.

@@ -141,7 +141,7 @@ Proof.
   assert (String_as_OT.lt v_max  (append v_max (String (Ascii.Ascii true true true false false true false false) EmptyString))).
   { clear v H. apply String_as_OT.cmp_lt. induction v_max. 
      + reflexivity.
-     + simpl. assert (a=a) by reflexivity. apply Ascii_as_OT.cmp_eq in H. rewrite H. tauto. }
+     + simpl. assert (a=a) by reflexivity.  apply Ascii_as_OT.cmp_eq in H. unfold Ascii_as_OT.cmp in H. rewrite H. tauto. }
   remember  (append v_max (String (Ascii.Ascii true true true false false true false false) EmptyString)) as z. destruct H.
   + assert (String_as_OT.lt v z). eapply String_as_OT.lt_trans. apply H. tauto.
       destruct (eq_dec v z);[|tauto]. apply String_as_OT.cmp_lt in H1. apply String_as_OT.cmp_eq in e. congruence. 

@@ -17,9 +17,6 @@ Export ListNotations.
 Module A:= StringName.
 Module B:= StringName.
 
-Lemma test:A.default = B.default.
-Proof. easy. Qed.
-
 Lemma Union_spec: forall A (v: A) P Q, Union _ P Q v <-> P v \/ Q v.
 Proof.
   intros.
@@ -487,31 +484,7 @@ Fixpoint sprop_gen (P: prop) (t: prop_table.prop_table) (n: V.t): sprop * prop_t
             end
   end.
 
-Fixpoint cnf_gen (P: sprop) (n: V.t) (cont: CNF): CNF * V.t :=
-  match P with
-  | SId x => (((true, x) :: nil) :: cont, n)
-  | SFalse => (((true, "impossible"):: nil) :: ((false, "impossible"):: nil) :: nil, n)
-  | STrue => (cont, n)
-  | SNot P1 => match clause_neg_gen P1 (V.next_name n) ((true, n) :: nil) (((false, n) :: nil) :: cont) with
-               | (cont'0, cont0, n0) => (cont'0 :: cont0, n0)
-               end
-  | SAnd P1 P2 => match cnf_gen P1 n cont with
-                  | (cont0, n0) => cnf_gen P2 n0 cont0
-                  end
-  | SOr P1 P2 => match clause_gen P1 n nil cont with
-                 | (cont'0, cont0, n0) =>
-                     match clause_gen P2 n0 cont'0 cont0 with
-                     | (cont'1, cont1, n1) => (cont'1 :: cont1, n1)
-                     end
-                 end
-  | SImpl P1 P2 => match clause_neg_gen P1 n nil cont with
-                   | (cont'0, cont0, n0) =>
-                       match clause_gen P2 n0 cont'0 cont0 with
-                       | (cont'1, cont1, n1) => (cont'1 :: cont1, n1)
-                       end
-                   end
-  end
-with clause_gen (P: sprop) (n: V.t) (cont': clause) (cont: CNF): clause * CNF * V.t :=
+Fixpoint clause_gen (P: sprop) (n: V.t) (cont': clause) (cont: CNF): clause * CNF * V.t :=
   match P with
   | SId x => ((true, x) :: cont', cont, n)
   | SFalse => (cont', cont, n)
@@ -559,9 +532,30 @@ with clause_neg_gen (P: sprop) (n: V.t) (cont': clause) (cont: CNF): clause * CN
                    end
   end.
 
-
-(* not (p /\ q)     not r /\ (p /\ q -> r) *)
-(* s /\ (p /\ q)     (s /\ r) /\ (r -> p /\ q) *)
+Fixpoint cnf_gen (P: sprop) (n: V.t) (cont: CNF): CNF * V.t :=
+  match P with
+  | SId x => (((true, x) :: nil) :: cont, n)
+  | SFalse => (((true, "impossible"):: nil) :: ((false, "impossible"):: nil) :: nil, n)
+  | STrue => (cont, n)
+  | SNot P1 => match clause_neg_gen P1 (V.next_name n) ((true, n) :: nil) (((false, n) :: nil) :: cont) with
+               | (cont'0, cont0, n0) => (cont'0 :: cont0, n0)
+               end
+  | SAnd P1 P2 => match cnf_gen P1 n cont with
+                  | (cont0, n0) => cnf_gen P2 n0 cont0
+                  end
+  | SOr P1 P2 => match clause_gen P1 n nil cont with
+                 | (cont'0, cont0, n0) =>
+                     match clause_gen P2 n0 cont'0 cont0 with
+                     | (cont'1, cont1, n1) => (cont'1 :: cont1, n1)
+                     end
+                 end
+  | SImpl P1 P2 => match clause_neg_gen P1 n nil cont with
+                   | (cont'0, cont0, n0) =>
+                       match clause_gen P2 n0 cont'0 cont0 with
+                       | (cont'1, cont1, n1) => (cont'1 :: cont1, n1)
+                       end
+                   end
+  end.
 
 Definition valid (P: prop): bool :=
   match sprop_gen (PNot P) nil "x" with
@@ -574,8 +568,6 @@ Definition valid (P: prop): bool :=
 Definition der_judgement: Type := list prop * prop.
 
 Definition proof_goal: Type := list der_judgement * der_judgement.
-
-Print fold_right.
 
 Definition der2prop (d: der_judgement): prop :=
   fold_right PImpl (snd d) (fst d).
@@ -1193,7 +1185,7 @@ Ltac reify_pg :=
   end.
 
 Ltac FOL_tauto :=
- first
+ try assumption; first
   [ reify_pg; apply dpll_sound; reflexivity
   | fail 1 "This is not an obvious tautology" ].
 
@@ -2220,164 +2212,6 @@ Tactic Notation "The" "conclusion" "is" "already" "proved" :=
 Export ShortNames.
 
 Ltac Tauto := FOL_tauto.  
-
-
-(* (*** Tutorial ***)
-(** Terms: Terms, which represent sets, are inductively defined by five constructors. **)
-Print term.
-(** V.t is the type of a variabe
-constructor var (with type V.t -> term) means a variabale x is a term
-empty_set is a constant, representing the emptyset ∅, which is a term of course
-singleton is a unary function (with type term -> term),  it takes a term (set) x and returns {x}, the set with only one element x
-constructor union/ intersection are binary functions (term -> term -> term), their meanings are self-explanatory
-**)
-
-(** Once we have terms, we may inductively define propositions. PRel x y means x∈y***)
-Print prop.
-
-(** For readability, we introduce notations. For instance, we use x ∪ y to represent (union x y) and ∀x,P to represent (PForall x P). 
-The notations can be found at line 51-66.
-Note that some notations are not in ASC-II (can not be directly found on the keyboard). 
-To display such symbols in Coq, first type the latex-format string of the symbol, then press shift+space at the end of it and
-the latex string will then be automatically converted to the coressponding symbol.
-For example, to type ∈, first type \in, and when the cursor is at the end of 'n', press shift+space, then \in will become ∈ **)
-
-(**Comparative table of latex string and symbols:
-  \in ∈; \cup ∪; \cap ∩; \forall ∀; \exists ∃; \emptyset ∅; \neg ¬; \subset ⊂ **)
-  
-  (**  Besides, you should always add [[ ]] outside the proposition so that Coq can recognize the notations in [[ ]]. 
-  The following two writings are the same for Coq. The left is a proposition with notations while the right directly follows the initial definition.**)
-Example  notation_example:  [[∀ x, {x} ∈ y]] = PForall x (PRel (singleton x) y).
- Proof.
-  reflexivity. (** You do not need this tactic in this homework**)
-Qed.
-
-(** Next we construct the proof  theory. The derivability is inductively defined by the inference rules of first order logic and axioms of ZFC set theory **)
-Print derivable.
-
-(** We also introduce notation Phi;;P |-- Q to represent derivable Phi;;P Q. 
-You need to add [[ ]] outside the whole derivable proposition so that Coq can recognize it. Within [[ ]], you do not need to add [[]] outside each prop**)
-(** Apart from rules in derivable, we also present four rules as axioms**)
-Print PImply_elim.
-Print PNot_Contra'.
-Print Exfalso.
-Print PNot_elim.
-
-(** With these proof rules, now we are able to prove derivability in Coq.**)
-
-Example Double_PAnd_intros:
-[[ZF;; x=y;;z∈w;;a={b} |-- x=y /\ z∈w/\ a={b}]].
-(** You have three propsitions as conditions, now you need to prove the and of them are derivable. **)
-Proof.
- (** You can see that the goal to be proved  is under a line on the right. We call it a proof goal. 
-  The proof strategy is straightforward, using PAnd_intros rule twice can solve the problem. 
-   Here we provide a very handy tactic 'FOL_tauto'  which can automatically prove the goal
-   if the goal can be proved by conditions only using proof rules about  AND, OR, NOT, IMPLY, IFF, Weaken and Assu **)
-  FOL_tauto.
-Qed.
-
-(** FOL_tauto is based on SAT solver. If you are interested, you can find DPLL from line 523-813**)
-
-(** Although FOL_tauto is powerful, it cannot prove the goal if introducing or elimnating a quantifier is required**)
-Example Fail_with_quantifier:
-  [[ZF;; ∀x, x =y |-- z = y]].
-Proof.
-  (* FOL_tauto. *) (** Try it yourself!!**)
-Abort.
-
-(** So you may use the PForall_elim rule yourself. However, we provide a more convenient tactic to do such thing. **) 
-Example Quantifier_elim1:
-   [[ZF;; ∀x, x =y |-- z = y]].
-Proof.
-   (** First we introduce a new condition by the 'assert' tactic. **)
-  assert ( [[ZF;; ∀ x,  x =  y |-- ∀ x,  x = y]] ) by FOL_tauto.
-  (* Now you can see there is a condition H above the line.  *)
-  (**  In the parentheses ()  after 'assert' is the proposition asserted. 
-  You can assert any proposition you like, however, the assert tactic will fail if the asserted proposition cannot be proved by FOL_tauto.**)
-  
-  (**  We can see the derived prop  in condition H is ∀ _x, (var _x) = (var _y) but in the proof goal it is  (var _z) = (var _y).
-    This is exactly the situation described in PForall_elim. **)
-    Check PForall_elim.
-    (**  If  Phi |-- ∀ x, P  then we have Phi |-- P [x |-> t]. 
-      Next we provide the ''universal instantiation'  tactic to deal with the ∀ quantifier with PForall_elim. **)
-   universal instantiation H z.
-   (**  You can see that we obtain a new condition H0. It is  same with H but the ∀ _x in H is specialized with _z. **)
-    (** This tactic automatically specializes ∀_x in H  with _z using PForall_elim.
-  The first argument H after ''universal instantiation' is the condition to be simplified. The next argument is the term to be substituted. 
-  Of course this tactic will fail if the derived prop (the prop after |--) in condition H does not start with ∀.
-  **)
-   
-  (**  Now the condition H is useless for the proof. You may delete it with the 'clear' tactic. 
-    You can delete any condition if you think it is not helpful for proving the goal.**)
-   clear H.
-   (** Now the proof is obvious. You can solve it with FOL_tauto.**)
-   FOL_tauto.
- Qed.
- (** From this example, you should learn how to introduce a condition using 'assert (...) by FOL_tauto' and 
-  how to use the PForall_elim rule by 'universal instantiation' **)
-
-(** Universal instantiation is powerful because it can apply the PForall_elim rule several times at once. Check this goal**)
- Example Quantifier_elim2:
-   [[ZF;; ∀x, ∀y, ∀z , x ∪ y ∪ z ∈ w |-- x ∪ u ∪ y∈ w ]].
-Proof.
-  (** First we still introduce a new condition **)
-  assert ([[ZF;; ∀x, ∀y, ∀z , x ∪ y ∪ z ∈ w |-- ∀x, ∀y, ∀z , x ∪ y ∪ z ∈ w]]) by FOL_tauto.
-  
-   (** Now there are two ∀ quantifiers after symbol |-- in H. To prove the goal, you need to use PForall_elim three times.
-   'universal instantiation'  does this for you simply by adding arguments.**)
-  universal instantiation H x u y.
-  (** It automatically specializes ∀x with x , ∀ y with u and ∀ z with y in H. 
-  Here the terms x, u, y are variables. You can actually eliminate the quantifier with any terms like ∅ or x ∩ y.
-  This tactic supports eliminating up to four quantifiers. Of course it will fail if there are only two quantifiers but you add four terms after the tactic. **)
-  FOL_tauto.
-Qed.
-
-(** The tactic 'universal generalization' is similar, but it deals with PForall_intros (introducing a ∀ quantifier)**)
-Example Quantifier_intros:
-  [[ZF |-- ∀x, x = x]].
-Proof.
-  (** Here we provide a new way to introduce a condition, the tactic 'pose proof' .**) 
-  pose proof PEq_refl x.
-  (** We fill the arguments of PEq_refl with ZF and x when using pose proof. 
-  You can see there is a new condition H above the line.
-  It is exactly the same as the proof rule PEq_refl, but with arguments filled.
-   **)
-   Check PEq_refl. (**  You should see PEq_refl in the message box at the bottom-right corner. Phi is now ZF and t is now (var x) in H.**)
-   (**  You can see the only difference between the proof goal and H is the ∀ quantifier. Then you can use 'universal generalization' .**)
-   universal generalization H x.
-   (**  Its usage is similar to  universal instantiation. Now you obtain a derivable proof with ∀ x. **)
-   (**  universal generalization only supports introducing one ∀ quantifier. And only variables can be introduced after ∀ 
-   You should also make sure that the introduced variable does not freely occur in Phi, as described in the proof rule. (Here Phi is ZF)**)
-   Check PForall_intros.
-   FOL_tauto.
-Qed.
-(** From this example, you should learn how to introduce a condition by 'pose proof' and 
-  how to use the PForall_intros rule by 'universal generalization' **)  
-
-(** Congratulations! Now you have simple yet powerful tools to prove theroems about set theory. Here we prove that there is only one empty set.**)
-Fact unique_empty_set:
-  [[ZF;; is_empty x |-- x=∅]].
-Proof.
-  pose proof Extensionality.
-  universal instantiation H x  [[∅]]. clear H.
-  (** Now we have the extensionality axiom. We should try to prove 
-    ZF ;; is_empty x |--
-       ∀ z,  z ∈ x <-> z ∈ ∅**)
-  
-  pose proof Empty.
-  universal instantiation H z. clear H.
-  assert ([[ZF  |--   z ∈ ∅ -> z ∈ x]]) by FOL_tauto.
-  assert ([[ZF;; is_empty x |-- ∀y, ¬ y ∈ x]]) by FOL_tauto.
-  universal instantiation H2 z. clear H2.
-  assert ([[ZF;; is_empty x |-- z ∈ x -> z ∈ ∅ ]]) by FOL_tauto.
-  assert ([[ZF;; is_empty x |-- z ∈ x <-> z ∈ ∅]]) by FOL_tauto.
-  clear H H1 H2 H3. 
-  universal generalization H4 z.
-  clear H4.
-  FOL_tauto.
-Qed.
- *)
-
   
 Module ToyDPLL_Debug.
 
@@ -2468,7 +2302,3 @@ Ltac fold_Xs :=
   set (X1 := "x"%string) in *.
 
 End ToyDPLL_Debug.
-
-Goal [[ZF;;is_empty x |-- x∈ y]].
-Proof.
-  peq_sub_cond_tac z  [[y∩∅]]  [[∀x, ¬ x ∈ z]].
